@@ -225,8 +225,27 @@ function KarmaReporter (tc, jasmineEnv) {
     currentSuite = currentSuite.parent
   }
 
-  this.specStarted = function () {
+  this.specStarted = function (specResult) {
     startTimeCurrentSpec = new _Date().getTime()
+
+    var suitePointer = currentSuite || {}
+    var suite = []
+
+    while (suitePointer.parent) {
+      suite.unshift(suitePointer.name)
+      suitePointer = suitePointer.parent
+    }
+
+    var result = {
+      fullName: specResult.fullName,
+      description: specResult.description,
+      id: specResult.id,
+      suite: suite
+    }
+
+    // send info about the spec being started, so if the browser crashes/ disconnects reporters can access which
+    // test it failed on.
+    tc.info({ current_spec: result })
   }
 
   this.specDone = function (specResult) {
